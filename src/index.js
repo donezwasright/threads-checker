@@ -10,6 +10,12 @@ export default {
           .trim()
           .replace(/^@/, "");
 
+	if (!/^[A-Za-z0-9._]+$/.test(username)) {
+  	 return Response.json({
+    	   status: "BANNED"
+  	  });
+	}
+
         if (!username) {
           return Response.json({
             status: "BANNED"
