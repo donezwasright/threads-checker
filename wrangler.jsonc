@@ -1,5 +1,8 @@
 {
   "name": "threads-checker",
   "main": "src/index.js",
-  "compatibility_date": "2026-08-01"
+  "compatibility_date": "2026-08-01",
+  "assets": {
+    "directory": "./public"
+  }
 }
