@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Threads Checker</title>
+
+    <style>
+
+        :root {
+            --bg: #f3f4f6;
+            --card: #ffffff;
+            --text: #111827;
+            --muted: #6b7280;
+            --border: #e5e7eb;
+            --input: #ffffff;
+            --item: #f9fafb;
+            --button: #111827;
+            --button-hover: #374151;
+            --active: #16a34a;
+            --banned: #dc2626;
+        }
+
+
+        body.dark {
+            --bg: #111827;
+            --card: #1f2937;
+            --text: #f9fafb;
+            --muted: #9ca3af;
+            --border: #374151;
+            --input: #111827;
+            --item: #111827;
+            --button: #f9fafb;
+            --button-hover: #d1d5db;
+        }
+
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            transition: background 0.2s, color 0.2s;
+        }
+
+
+        .wrapper {
+            width: min(900px, 94%);
+            margin: 35px auto 50px;
+        }
+
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+
+        .brand h1 {
+            margin: 0;
+            font-size: 30px;
+        }
+
+
+        .brand p {
+            margin: 6px 0 0;
+            color: var(--muted);
+        }
+
+
+        .theme-button {
+            border: 1px solid var(--border);
+            background: var(--card);
+            color: var(--text);
+            border-radius: 10px;
+            padding: 10px 14px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 22px;
+            margin-bottom: 18px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+        }
+
+
+        body.dark .card {
+            box-shadow: none;
+        }
+
+
+        textarea {
+            width: 100%;
+            height: 190px;
+            resize: vertical;
+            padding: 15px;
+            border: 1px solid var(--border);
+            border-radius: 11px;
+            background: var(--input);
+            color: var(--text);
+            font-size: 15px;
+            outline: none;
+        }
+
+
+        textarea:focus {
+            border-color: var(--text);
+        }
+
+
+        .main-buttons {
+            display: grid;
+            grid-template-columns: 1fr 120px;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+
+        button {
+            border: none;
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+
+        .check-button {
+            background: var(--button);
+            color: var(--bg);
+        }
+
+
+        .check-button:hover {
+            background: var(--button-hover);
+        }
+
+
+        .check-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+
+        .stop-button {
+            background: #dc2626;
+            color: white;
+        }
+
+
+        .stop-button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+
+        .progress-box {
+            display: none;
+            margin-top: 20px;
+        }
+
+
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+
+        .progress-bar {
+            width: 100%;
+            height: 9px;
+            background: var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+
+        .progress-fill {
+            width: 0%;
+            height: 100%;
+            background: var(--text);
+            transition: width 0.2s ease;
+        }
+
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+
+        .stat {
+            padding: 17px;
+            border-radius: 12px;
+            text-align: center;
+            background: var(--item);
+        }
+
+
+        .stat-number {
+            font-size: 25px;
+            font-weight: bold;
+        }
+
+
+        .stat-label {
+            margin-top: 4px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+
+        .active-number {
+            color: var(--active);
+        }
+
+
+        .banned-number {
+            color: var(--banned);
+        }
+
+
+        .result-section {
+            margin-top: 22px;
+        }
+
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+
+        .result-title {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+
+        .username {
+            padding: 10px 13px;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            background: var(--item);
+            font-family: monospace;
+            font-size: 14px;
+        }
+
+
+        .active {
+            border-left: 4px solid var(--active);
+        }
+
+
+        .banned {
+            border-left: 4px solid var(--banned);
+        }
+
+
+        .actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 25px;
+        }
+
+
+        .copy-button,
+        .download-button {
+            background: var(--button);
+            color: var(--bg);
+        }
+
+
+        .clear-button {
+            background: var(--border);
+            color: var(--text);
+        }
+
+
+        .empty {
+            color: var(--muted);
+            font-size: 13px;
+            padding: 8px 0;
+        }
+
+
+        .footer {
+            text-align: center;
+            color: var(--muted);
+            font-size: 12px;
+            margin-top: 25px;
+        }
+
+
+        @media (max-width: 600px) {
+
+            .wrapper {
+                width: 92%;
+                margin-top: 20px;
+            }
+
+
+            .topbar {
+                align-items: flex-start;
+            }
+
+
+            .brand h1 {
+                font-size: 25px;
+            }
+
+
+            .brand p {
+                font-size: 13px;
+            }
+
+
+            .main-buttons {
+                grid-template-columns: 1fr;
+            }
+
+
+            .stop-button {
+                width: 100%;
+            }
+
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+
+            .card {
+                padding: 16px;
+            }
+
+
+            .actions button {
+                width: 100%;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+<div class="wrapper">
+
+
+    <div class="topbar">
+
+        <div class="brand">
+
+            <h1>🔎 Threads Checker</h1>
+
+            <p>Check status akun Threads dengan cepat</p>
+
+        </div>
+
+
+        <button
+            class="theme-button"
+            onclick="toggleTheme()"
+            id="themeButton"
+        >
+            🌙
+        </button>
+
+    </div>
+
+
+
+    <div class="card">
+
+        <textarea
+            id="usernameInput"
+            placeholder="Masukkan username, satu per baris...
+
+contoh:
+donezwasright
+madkiri
+Earth02"
+        ></textarea>
+
+
+        <div class="main-buttons">
+
+            <button
+                id="checkButton"
+                class="check-button"
+                onclick="startChecking()"
+            >
+                🔍 CHECK
+            </button>
+
+
+            <button
+                id="stopButton"
+                class="stop-button"
+                onclick="stopChecking()"
+                disabled
+            >
+                ⛔ STOP
+            </button>
+
+        </div>
+
+
+        <div
+            id="progressBox"
+            class="progress-box"
+        >
+
+            <div class="progress-text">
+
+                <span id="progressStatus">
+                    Checking...
+                </span>
+
+                <span id="progressCount">
+                    0 / 0
+                </span>
+
+            </div>
+
+
+            <div class="progress-bar">
+
+                <div
+                    id="progressFill"
+                    class="progress-fill"
+                ></div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <div
+        id="resultCard"
+        class="card"
+        style="display:none;"
+    >
+
+
+        <div class="stats">
+
+            <div class="stat">
+
+                <div
+                    id="totalCount"
+                    class="stat-number"
+                >
+                    0
+                </div>
+
+                <div class="stat-label">
+                    Total
+                </div>
+
+            </div>
+
+
+            <div class="stat">
+
+                <div
+                    id="activeCount"
+                    class="stat-number active-number"
+                >
+                    0
+                </div>
+
+                <div class="stat-label">
+                    Aktif
+                </div>
+
+            </div>
+
+
+            <div class="stat">
+
+                <div
+                    id="bannedCount"
+                    class="stat-number banned-number"
+                >
+                    0
+                </div>
+
+                <div class="stat-label">
+                    Banned
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <div class="result-section">
+
+            <div class="result-header">
+
+                <div class="result-title">
+                    🟢 AKTIF
+                </div>
+
+            </div>
+
+
+            <div id="activeResults"></div>
+
+        </div>
+
+
+
+        <div class="result-section">
+
+            <div class="result-header">
+
+                <div class="result-title">
+                    🔴 BANNED
+                </div>
+
+            </div>
+
+
+            <div id="bannedResults"></div>
+
+        </div>
+
+
+
+        <div class="actions">
+
+            <button
+                class="copy-button"
+                onclick="copyActive()"
+            >
+                📋 Copy Aktif
+            </button>
+
+
+            <button
+                class="copy-button"
+                onclick="copyBanned()"
+            >
+                📋 Copy Banned
+            </button>
+
+
+            <button
+                class="download-button"
+                onclick="downloadActive()"
+            >
+                📥 Aktif TXT
+            </button>
+
+
+            <button
+                class="download-button"
+                onclick="downloadBanned()"
+            >
+                📥 Banned TXT
+            </button>
+
+
+            <button
+                class="clear-button"
+                onclick="clearResults()"
+            >
+                🧹 Clear
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <div class="footer">
+        Threads Checker • Local Version
+    </div>
+
+</div>
+
+
+
+<script>
+
+let activeUsers = [];
+let bannedUsers = [];
+
+let stopRequested = false;
+let currentController = null;
+
+
+
+function toggleTheme() {
+
+    document.body.classList.toggle("dark");
+
+    const dark =
+        document.body.classList.contains("dark");
+
+    document.getElementById("themeButton").textContent =
+        dark ? "☀️" : "🌙";
+
+    localStorage.setItem(
+        "threadsTheme",
+        dark ? "dark" : "light"
+    );
+
+}
+
+
+
+if (localStorage.getItem("threadsTheme") === "dark") {
+
+    document.body.classList.add("dark");
+
+    document.getElementById("themeButton").textContent =
+        "☀️";
+
+}
+
+
+
+async function startChecking() {
+
+    const input =
+        document.getElementById("usernameInput");
+
+
+    let usernames = input.value
+        .split(/\r?\n/)
+        .map(username =>
+            username.trim().replace(/^@/, "")
+        )
+        .filter(username =>
+            username.length > 0
+        );
+
+
+    usernames = [...new Set(usernames)];
+
+
+    if (usernames.length === 0) {
+
+        alert("Masukkan username terlebih dahulu.");
+
+        return;
+
+    }
+
+
+    activeUsers = [];
+    bannedUsers = [];
+
+    stopRequested = false;
+
+
+    const checkButton =
+        document.getElementById("checkButton");
+
+    const stopButton =
+        document.getElementById("stopButton");
+
+    const progressBox =
+        document.getElementById("progressBox");
+
+    const resultCard =
+        document.getElementById("resultCard");
+
+
+    checkButton.disabled = true;
+
+    stopButton.disabled = false;
+
+    checkButton.textContent =
+        "⏳ CHECKING...";
+
+
+    progressBox.style.display =
+        "block";
+
+    resultCard.style.display =
+        "block";
+
+
+    document.getElementById(
+        "activeResults"
+    ).innerHTML = "";
+
+
+    document.getElementById(
+        "bannedResults"
+    ).innerHTML = "";
+
+
+    const total =
+        usernames.length;
+
+
+    updateStats(total);
+
+
+    for (
+        let i = 0;
+        i < total;
+        i++
+    ) {
+
+
+        if (stopRequested) {
+
+            break;
+
+        }
+
+
+        const username =
+            usernames[i];
+
+
+        document.getElementById(
+            "progressStatus"
+        ).textContent =
+            "Checking " + username + "...";
+
+
+        document.getElementById(
+            "progressCount"
+        ).textContent =
+            `${i + 1} / ${total}`;
+
+
+        const percentage =
+            ((i + 1) / total) * 100;
+
+
+        document.getElementById(
+            "progressFill"
+        ).style.width =
+            percentage + "%";
+
+
+        try {
+
+
+            currentController =
+                new AbortController();
+
+
+            const response =
+                await fetch("/check", {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        username:
+                            username
+                    }),
+
+                    signal:
+                        currentController.signal
+
+                });
+
+
+            const data =
+                await response.json();
+
+
+            if (
+                data.status === "AKTIF"
+            ) {
+
+
+                activeUsers.push(
+                    username
+                );
+
+
+                addResult(
+                    "activeResults",
+                    username,
+                    "active"
+                );
+
+
+            } else {
+
+
+                bannedUsers.push(
+                    username
+                );
+
+
+                addResult(
+                    "bannedResults",
+                    username,
+                    "banned"
+                );
+
+            }
+
+
+            updateStats(total);
+
+
+        } catch (error) {
+
+
+            if (
+                error.name ===
+                "AbortError"
+            ) {
+
+                break;
+
+            }
+
+
+            bannedUsers.push(
+                username
+            );
+
+
+            addResult(
+                "bannedResults",
+                username,
+                "banned"
+            );
+
+
+            updateStats(total);
+
+        }
+
+    }
+
+
+    if (stopRequested) {
+
+        document.getElementById(
+            "progressStatus"
+        ).textContent =
+            "⛔ Dihentikan";
+
+
+    } else {
+
+        document.getElementById(
+            "progressStatus"
+        ).textContent =
+            "✅ Selesai";
+
+    }
+
+
+    checkButton.disabled =
+        false;
+
+
+    stopButton.disabled =
+        true;
+
+
+    checkButton.textContent =
+        "🔍 CHECK";
+
+
+    currentController =
+        null;
+
+}
+
+
+
+function stopChecking() {
+
+    stopRequested =
+        true;
+
+
+    if (currentController) {
+
+        currentController.abort();
+
+    }
+
+
+    document.getElementById(
+        "progressStatus"
+    ).textContent =
+        "⛔ Menghentikan...";
+
+
+    document.getElementById(
+        "stopButton"
+    ).disabled =
+        true;
+
+}
+
+
+
+function addResult(
+    containerId,
+    username,
+    type
+) {
+
+
+    const container =
+        document.getElementById(
+            containerId
+        );
+
+
+    const div =
+        document.createElement(
+            "div"
+        );
+
+
+    div.className =
+        "username " + type;
+
+
+    div.textContent =
+        username;
+
+
+    container.appendChild(
+        div
+    );
+
+}
+
+
+
+function updateStats(total) {
+
+    document.getElementById(
+        "totalCount"
+    ).textContent =
+        total;
+
+
+    document.getElementById(
+        "activeCount"
+    ).textContent =
+        activeUsers.length;
+
+
+    document.getElementById(
+        "bannedCount"
+    ).textContent =
+        bannedUsers.length;
+
+}
+
+
+
+async function copyActive() {
+
+    if (
+        activeUsers.length === 0
+    ) {
+
+        alert(
+            "Tidak ada username aktif."
+        );
+
+        return;
+
+    }
+
+
+    await navigator.clipboard.writeText(
+        activeUsers.join("\n")
+    );
+
+
+    alert(
+        "Username aktif berhasil dicopy."
+    );
+
+}
+
+
+
+async function copyBanned() {
+
+    if (
+        bannedUsers.length === 0
+    ) {
+
+        alert(
+            "Tidak ada username banned."
+        );
+
+        return;
+
+    }
+
+
+    await navigator.clipboard.writeText(
+        bannedUsers.join("\n")
+    );
+
+
+    alert(
+        "Username banned berhasil dicopy."
+    );
+
+}
+
+
+
+function downloadFile(
+    filename,
+    data
+) {
+
+
+    if (
+        data.length === 0
+    ) {
+
+        alert(
+            "Tidak ada username untuk didownload."
+        );
+
+        return;
+
+    }
+
+
+    const blob =
+        new Blob(
+            [data.join("\n")],
+            {
+                type:
+                    "text/plain;charset=utf-8"
+            }
+        );
+
+
+    const url =
+        URL.createObjectURL(
+            blob
+        );
+
+
+    const link =
+        document.createElement(
+            "a"
+        );
+
+
+    link.href =
+        url;
+
+
+    link.download =
+        filename;
+
+
+    document.body.appendChild(
+        link
+    );
+
+
+    link.click();
+
+
+    document.body.removeChild(
+        link
+    );
+
+
+    URL.revokeObjectURL(
+        url
+    );
+
+}
+
+
+
+function downloadActive() {
+
+    downloadFile(
+        "aktif.txt",
+        activeUsers
+    );
+
+}
+
+
+
+function downloadBanned() {
+
+    downloadFile(
+        "banned.txt",
+        bannedUsers
+    );
+
+}
+
+
+
+function clearResults() {
+
+    document.getElementById(
+        "usernameInput"
+    ).value =
+        "";
+
+
+    document.getElementById(
+        "activeResults"
+    ).innerHTML =
+        "";
+
+
+    document.getElementById(
+        "bannedResults"
+    ).innerHTML =
+        "";
+
+
+    document.getElementById(
+        "resultCard"
+    ).style.display =
+        "none";
+
+
+    document.getElementById(
+        "progressBox"
+    ).style.display =
+        "none";
+
+
+    document.getElementById(
+        "progressFill"
+    ).style.width =
+        "0%";
+
+
+    activeUsers = [];
+
+    bannedUsers = [];
+
+    stopRequested = false;
+
+}
+
+
+
+</script>
+
+</body>
+
+</html>
